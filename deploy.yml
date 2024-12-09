@@ -1,0 +1,6 @@
+---
+- name: Deploy artifact to tomcat server
+  hosts: tomcat-host
+  become: true
+  roles:
+    - deploy
