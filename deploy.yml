@@ -1,7 +1,8 @@
 ---
-- name: Deploy artifact to tomcat server
+- name: Deploy application to Tomcat server
   hosts: tomcat-host
   become: true
-  become_user: tomcat
-  roles:
+  remote_user: jenkins
+  roles: 
     - deploy
+

@@ -1,34 +1,30 @@
 ---
-- name: Create a directory for the artifact
-  ansible.builtin.file:
-    path: /opt/artifacts
-    state: directory
-    owner: tomcat
-    group: tomcat
-    mode: '0755'
+- name: Ensure tomcat is running
+  service:
+    name: tomcat
+    state: started
+    enabled: yes
 
-- name: Download artifact from Nexus
-  ansible.builtin.get_url:
-    url: "http://192.168.4.109:8081/#browse/browse:java-docker-nexus-release:com                                                                                                                                                             %2Fdept%2Fapp%2FMyWebApp%2F1.0%2FMyWebApp-1.0.war"
-    dest: /opt/artifacts/MyWebApp-1.0.war
-    mode: '0644'
-    owner: tomcat
-    group: tomcat
-
-- name: Stop Tomcat service
-  ansible.builtin.service:
+- name: Stop Tomcat server
+  service:
     name: tomcat
     state: stopped
 
-- name: Copy artifact to Tomcat webapps
-  ansible.builtin.copy:
-    src: /opt/artifacts/MyWebApp-1.0.war
-    dest: /opt/tomcat/webapps/MyWebApp-1.0.war
-    owner: tomcat
-    group: tomcat
-    mode: '0644'
+- name: Pull artifact from Nexus
+  get_url:
+    url: "http://192.168.4.109:8081/repository/java-docker-nexus-release/com/dept/app/MyWebApp/1.0/MyWebApp-1.0.war"
+    dest: "/tmp/MyWebApp-1.0.war"
 
-- name: Start Tomcat service
-  ansible.builtin.service:
+- name: Deploy application to Tomcat webapps
+  copy:
+    src: "/tmp/MyWebApp-1.0.war"
+    dest: "/opt/tomcat/webapps/"
+    remote_src: true
+  become: true
+
+- name: Start Tomcat server
+  service:
     name: tomcat
     state: started
+
+
