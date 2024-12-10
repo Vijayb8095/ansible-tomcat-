@@ -27,7 +27,6 @@
     owner: tomcat
     group: tomcat 
     mode: '0644'
-  remote_src: true
 
 - name: Start Tomcat service
   ansible.builtin.service:
