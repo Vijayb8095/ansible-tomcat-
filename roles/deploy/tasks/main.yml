@@ -20,13 +20,11 @@
     name: tomcat
     state: stopped
 
-- name: Copy artifact to Tomcat webapps
-  copy:
+- name: Move artifact to Tomcat webapps
+  ansible.builtin.move:
     src: /opt/artifacts/MyWebApp-1.0.war
     dest: /opt/tomcat/webapps/MyWebApp-1.0.war
-    owner: tomcat
-    group: tomcat 
-    mode: '0644'
+    validate: no
 
 - name: Start Tomcat service
   ansible.builtin.service:
