@@ -3,12 +3,16 @@
   ansible.builtin.file:
     path: /opt/artifacts
     state: directory
+    owner: tomcat
+    group: tomcat
     mode: '0755'
 
 - name: Download artifact from Nexus 
   ansible.builtin.get_url:
     url: "http://192.168.4.109:8081/#browse/browse:java-docker-nexus-release:com%2Fdept%2Fapp%2FMyWebApp%2F1.0%2FMyWebApp-1.0.war"
     dest: /opt/artifacts/MyWebApp-1.0.war
+    owner: tomcat
+    group: tomcat
     mode: '0644'
 
 - name: Stop Tomcat service
