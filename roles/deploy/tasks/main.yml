@@ -23,7 +23,7 @@
   failed_when: artifact_checksum.rc != 0
 
 - name: Log artifact checksum
-  command: "echo '{{ artifact_checksum.stdout }}' >> /var/log/artifact_checksums.log"
+  command: "echo '{{ artifact_checksum.stdout }}' >> /tmp/artifact_checksums.log"
   when: artifact_checksum.rc == 0
   register: checksum_logged
   failed_when: checksum_logged.rc != 0
