@@ -1,8 +1,4 @@
 ---
-- name: Ensure Tomcat is installed
-  command: "yum list installed tomcat"
-  register: tomcat_installed
-  failed_when: tomcat_installed.rc != 0
 
 - name: Ensure Tomcat is running
   service:
