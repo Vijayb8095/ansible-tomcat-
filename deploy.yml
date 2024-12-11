@@ -8,5 +8,5 @@
 
   vars:
      nexus_url: "http://192.168.4.109:8081"
-     tomcat_deploy_path: "/var/lib/tomcat/webapps"    
+     tomcat_deploy_path: "/opt/tomcat/webapps"    
 
