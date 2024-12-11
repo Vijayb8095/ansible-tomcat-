@@ -1,30 +1,56 @@
 ---
-- name: Ensure tomcat is running
-  service:
-    name: tomcat
-    state: started
-    enabled: yes
+# roles/deploy/main.yml
 
-- name: Stop Tomcat server
-  service:
-    name: tomcat
-    state: stopped
+# Define variables used in tasks
+vars:
+  nexus_url: "http://nexus.example.com"
+  tomcat_deploy_path: "/var/lib/tomcat/webapps"
 
-- name: Pull artifact from Nexus
-  get_url:
-    url: "http://192.168.4.109:8081/repository/java-docker-nexus-release/com/dept/app/MyWebApp/1.0/MyWebApp-1.0.war"
-    dest: "/tmp/MyWebApp-1.0.war"
+# Tasks to manage Tomcat and deploy the application
+tasks:
+  - name: Ensure Tomcat is installed
+    command: "yum list installed tomcat"
+    register: tomcat_installed
+    failed_when: tomcat_installed.rc != 0
 
-- name: Deploy application to Tomcat webapps
-  copy:
-    src: "/tmp/MyWebApp-1.0.war"
-    dest: "/opt/tomcat/webapps/"
-    remote_src: true
-  become: true
+  - name: Ensure Tomcat is running
+    service:
+      name: tomcat
+      state: started
+      enabled: yes
 
-- name: Start Tomcat server
-  service:
-    name: tomcat
-    state: started
+  - name: Stop Tomcat server
+    service:
+      name: tomcat
+      state: stopped
+
+  - name: Pull artifact from Nexus
+    get_url:
+      url: "{{ nexus_url }}/com/dept/app/MyWebApp/1.0/MyWebApp-1.0.war"
+      dest: "/tmp/MyWebApp-1.0.war"
+      validate_certs: yes
+
+  - name: Validate downloaded artifact
+    command: "sha256sum /tmp/MyWebApp-1.0.war"
+    register: artifact_checksum
+    failed_when: artifact_checksum.rc != 0
+
+  - name: Log artifact checksum
+    command: "echo '{{ artifact_checksum.stdout }}' >> /var/log/artifact_checksums.log"
+    when: artifact_checksum.rc == 0
+    register: checksum_logged
+    failed_when: checksum_logged.rc != 0
+
+  - name: Deploy application to Tomcat webapps
+    copy:
+      src: "/tmp/MyWebApp-1.0.war"
+      dest: "{{ tomcat_deploy_path }}/MyWebApp-1.0.war"
+      remote_src: true
+      become: true
+
+  - name: Start Tomcat server
+    service:
+      name: tomcat
+      state: started
 
 
