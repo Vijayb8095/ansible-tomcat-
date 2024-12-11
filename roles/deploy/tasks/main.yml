@@ -1,7 +1,7 @@
 ---
 - name: Ensure sha256sum is installed
   become: yes
-  apt:
+  yum:
     name: sha256sum
     state: present
   when: "'sha256sum' not in ansible_facts['os_family']"
