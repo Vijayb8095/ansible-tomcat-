@@ -1,56 +1,52 @@
 ---
-# roles/deploy/main.yml
-
 # Define variables used in tasks
 vars:
   nexus_url: "http://nexus.example.com"
   tomcat_deploy_path: "/var/lib/tomcat/webapps"
 
 # Tasks to manage Tomcat and deploy the application
-tasks:
-  - name: Ensure Tomcat is installed
-    command: "yum list installed tomcat"
-    register: tomcat_installed
-    failed_when: tomcat_installed.rc != 0
+- name: Ensure Tomcat is installed
+  command: "yum list installed tomcat"
+  register: tomcat_installed
+  failed_when: tomcat_installed.rc != 0
 
-  - name: Ensure Tomcat is running
-    service:
-      name: tomcat
-      state: started
-      enabled: yes
+- name: Ensure Tomcat is running
+  service:
+    name: tomcat
+    state: started
+    enabled: yes
 
-  - name: Stop Tomcat server
-    service:
-      name: tomcat
-      state: stopped
+- name: Stop Tomcat server
+  service:
+    name: tomcat
+    state: stopped
 
-  - name: Pull artifact from Nexus
-    get_url:
-      url: "{{ nexus_url }}/com/dept/app/MyWebApp/1.0/MyWebApp-1.0.war"
-      dest: "/tmp/MyWebApp-1.0.war"
-      validate_certs: yes
+- name: Pull artifact from Nexus
+  get_url:
+    url: "{{ nexus_url }}/com/dept/app/MyWebApp/1.0/MyWebApp-1.0.war"
+    dest: "/tmp/MyWebApp-1.0.war"
+    validate_certs: yes
 
-  - name: Validate downloaded artifact
-    command: "sha256sum /tmp/MyWebApp-1.0.war"
-    register: artifact_checksum
-    failed_when: artifact_checksum.rc != 0
+- name: Validate downloaded artifact
+  command: "sha256sum /tmp/MyWebApp-1.0.war"
+  register: artifact_checksum
+  failed_when: artifact_checksum.rc != 0
 
-  - name: Log artifact checksum
-    command: "echo '{{ artifact_checksum.stdout }}' >> /var/log/artifact_checksums.log"
-    when: artifact_checksum.rc == 0
-    register: checksum_logged
-    failed_when: checksum_logged.rc != 0
+- name: Log artifact checksum
+  command: "echo '{{ artifact_checksum.stdout }}' >> /var/log/artifact_checksums.log"
+  when: artifact_checksum.rc == 0
+  register: checksum_logged
+  failed_when: checksum_logged.rc != 0
 
-  - name: Deploy application to Tomcat webapps
-    copy:
-      src: "/tmp/MyWebApp-1.0.war"
-      dest: "{{ tomcat_deploy_path }}/MyWebApp-1.0.war"
-      remote_src: true
-      become: true
+- name: Deploy application to Tomcat webapps
+  copy:
+    src: "/tmp/MyWebApp-1.0.war"
+    dest: "{{ tomcat_deploy_path }}/MyWebApp-1.0.war"
+    remote_src: true
+    become: true
 
-  - name: Start Tomcat server
-    service:
-      name: tomcat
-      state: started
-
+- name: Start Tomcat server
+  service:
+    name: tomcat
+    state: started
 
