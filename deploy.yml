@@ -6,3 +6,7 @@
   roles: 
     - deploy
 
+  vars:
+     nexus_url: "http://nexus.example.com"
+     tomcat_deploy_path: "/var/lib/tomcat/webapps"    
+

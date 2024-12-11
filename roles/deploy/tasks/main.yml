@@ -1,10 +1,4 @@
 ---
-# Define variables used in tasks
-vars:
-  nexus_url: "http://nexus.example.com"
-  tomcat_deploy_path: "/var/lib/tomcat/webapps"
-
-# Tasks to manage Tomcat and deploy the application
 - name: Ensure Tomcat is installed
   command: "yum list installed tomcat"
   register: tomcat_installed
