@@ -33,7 +33,7 @@
     src: "/tmp/MyWebApp-1.0.war"
     dest: "{{ tomcat_deploy_path }}/MyWebApp-1.0.war"
     remote_src: true
-    become: true
+  become: true
 
 - name: Start Tomcat server
   service:
