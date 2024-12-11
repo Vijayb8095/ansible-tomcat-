@@ -1,5 +1,3 @@
----
-
 - name: Ensure Tomcat is running
   service:
     name: tomcat
@@ -16,6 +14,9 @@
     url: "{{ nexus_url }}/repository/java-docker-nexus-release/com/dept/app/MyWebApp/1.0/MyWebApp-1.0.war"
     dest: "/tmp/MyWebApp-1.0.war"
     validate_certs: yes
+  environment:
+    http_proxy: "{{ proxy_url }}"
+    https_proxy: "{{ proxy_url }}"
 
 - name: Validate downloaded artifact
   command: "sha256sum /tmp/MyWebApp-1.0.war"
