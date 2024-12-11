@@ -19,10 +19,12 @@
   command: "sha256sum /tmp/MyWebApp-1.0.war"
   register: artifact_checksum
   failed_when: artifact_checksum.rc != 0
+  become: true  
 
 - name: Log artifact checksum
   ansible.builtin.command: "echo '{{ artifact_checksum.stdout | quote }}' >> /tmp/artifact_checksums.log"
   when: artifact_checksum.rc == 0
+  become: true  
 
 - name: Deploy application to Tomcat webapps
   copy:
