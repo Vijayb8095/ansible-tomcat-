@@ -13,7 +13,7 @@
 
 - name: Pull artifact from Nexus
   get_url:
-    url: "{{ nexus_url }}/com/dept/app/MyWebApp/1.0/MyWebApp-1.0.war"
+    url: "{{ nexus_url }}/repository/java-docker-nexus-release/com/dept/app/MyWebApp/1.0/MyWebApp-1.0.war"
     dest: "/tmp/MyWebApp-1.0.war"
     validate_certs: yes
 
