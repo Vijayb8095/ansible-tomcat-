@@ -10,19 +10,7 @@
     name: tomcat
     state: stopped
 
-- name: Pull artifact from Nexus
-  get_url:
-    url: "{{ nexus_url }}/repository/java-docker-nexus-release/com/dept/app/MyWebApp/1.0/MyWebApp-1.0.war"
-    dest: "/tmp/MyWebApp-1.0.war"
-
-- name: Deploy application to Tomcat webapps
-  copy:
-    src: "/tmp/MyWebApp-1.0.war"
-    dest: "{{ tomcat_deploy_path }}"
-    remote_src: true
-  become: true
-
-- name: Backup existing application in Tomcat webapps
+- name: Backup existing WAR file in Tomcat webapps
   block:
     - name: Get current timestamp
       set_fact:
@@ -32,19 +20,42 @@
       file:
         path: "{{ tomcat_deploy_path }}/backup/{{ backup_timestamp }}"
         state: directory
-        owner: tomcat  
-  become: true
+        owner: tomcat
 
-- name: Move existing WAR file to backup folder
-  block:
     - name: Check if the WAR file exists
       stat:
         path: "{{ tomcat_deploy_path }}/MyWebApp-1.0.war"
       register: war_file_stat
 
-    - name: Move existing WAR file to backup folder with timestamp
+    - name: Move existing WAR file to backup folder
       command: mv "{{ tomcat_deploy_path }}/MyWebApp-1.0.war" "{{ tomcat_deploy_path }}/backup/{{ backup_timestamp }}/"
       when: war_file_stat.stat.exists
+      become_user: tomcat  
+
+- name: Copy cleanup script to Tomcat server
+  copy:
+    src: cleanup_backups.sh
+    dest: "{{ tomcat_deploy_path }}/backup/cleanup_backups.sh"
+    mode: '0755'
+    owner: tomcat    
+
+- name: Run cleanup script to retain last 5 backups
+  command: bash "{{ tomcat_deploy_path }}/backup/cleanup_backups.sh"
+  become: true
+  become_user: tomcat
+
+- name: Pull new artifact from Nexus
+  get_url:
+    url: "{{ nexus_url }}/repository/java-docker-nexus-release/com/dept/app/MyWebApp/1.0/MyWebApp-1.0.war"
+    dest: "/tmp/MyWebApp-1.0.war"
+    
+
+- name: Deploy new application to Tomcat webapps
+  copy:
+    src: "/tmp/MyWebApp-1.0.war"
+    dest: "{{ tomcat_deploy_path }}/MyWebApp-1.0.war"
+    remote_src: true
+    owner: tomcat
   become: true
 
 - name: Start Tomcat server
