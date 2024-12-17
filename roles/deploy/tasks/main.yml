@@ -22,6 +22,31 @@
     remote_src: true
   become: true
 
+- name: Backup existing application in Tomcat webapps
+  block:
+    - name: Get current timestamp
+      set_fact:
+        backup_timestamp: "{{ ansible_date_time.date | replace('-', '') }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}{{ ansible_date_time.second }}"
+
+    - name: Create backup directory with timestamp inside the backup folder
+      file:
+        path: "{{ tomcat_deploy_path }}/backup/{{ backup_timestamp }}"
+        state: directory
+        owner: tomcat  
+  become: true
+
+- name: Move existing WAR file to backup folder
+  block:
+    - name: Check if the WAR file exists
+      stat:
+        path: "{{ tomcat_deploy_path }}/MyWebApp-1.0.war"
+      register: war_file_stat
+
+    - name: Move existing WAR file to backup folder with timestamp
+      command: mv "{{ tomcat_deploy_path }}/MyWebApp-1.0.war" "{{ tomcat_deploy_path }}/backup/{{ backup_timestamp }}/"
+      when: war_file_stat.stat.exists
+  become: true
+
 - name: Start Tomcat server
   service:
     name: tomcat
